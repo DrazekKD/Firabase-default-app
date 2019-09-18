@@ -1,23 +1,23 @@
 import React from 'react';
 import { compose } from 'recompose';
 
+import { inject, observer } from "mobx-react";
 import {PasswordForgetForm} from "../PasswordForget";
 import PasswordChangeForm from "../PasswordChange";
-import {AuthUserContext ,withAuthorization,withEmailVerification} from '../Session';
+import { withAuthorization, withEmailVerification } from '../Session';
 
-const AccountPage = () => (
-	<AuthUserContext.Consumer>
-		{authUser => (
+const AccountPage = ({ sessionStore }) => (
+
 			<div>
-				<h1>Account Page {authUser.email}</h1>
+				<h1>Account Page {sessionStore.authUser.email}</h1>
 				<PasswordForgetForm/>
 				<PasswordChangeForm/>
 			</div>
-		)}
-	</AuthUserContext.Consumer>
 );
 const condition = authUser => !!authUser;
 export default compose(
+	inject('sessionStore'),
+	observer,
 	withEmailVerification,
 	withAuthorization(condition),
 )(AccountPage)

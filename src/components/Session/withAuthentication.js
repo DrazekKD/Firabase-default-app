@@ -2,25 +2,27 @@ import React from 'react';
 
 import AuthUserContext from './context';
 import { withFirebase } from '../Firebase';
+import { inject } from "mobx-react";
+import { compose } from "recompose";
 
 const withAuthentication = Component => {
 	class WithAuthentication extends React.Component {
 		constructor(props) {
 			super(props);
-			this.state = {
-				authUser: JSON.parse(localStorage.getItem('authUser'))
-			};
+			this.props.sessionStore.setAuthUser(
+				JSON.parse(localStorage.getItem('authUser'))
+			);
 		}
 
 		componentDidMount() {
 			this.listener = this.props.firebase.onAuthUserListener(
 				authUser => {
 					localStorage.setItem('authUser', JSON.stringify(authUser));
-					this.setState({authUser})
+					this.props.sessionStore.setAuthUser(authUser);
 				},
 				() =>{
 					localStorage.removeItem('authUser');
-					this.setState({authUser: null})
+					this.props.sessionStore.setAuthUser(null)
 				}
 			);
 		}
@@ -29,14 +31,13 @@ const withAuthentication = Component => {
 			this.listener();
 		}
 		render() {
-			return (
-				<AuthUserContext.Provider value={this.state.authUser}>
-					<Component {...this.props} />
-				</AuthUserContext.Provider>
-			)
+			return <Component {...this.props} />
 		}
 	}
-	return withFirebase(WithAuthentication)
+	return compose(
+		withFirebase,
+		inject('sessionStore'))
+	(WithAuthentication);
 };
 
 export default withAuthentication

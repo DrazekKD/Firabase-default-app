@@ -5,6 +5,7 @@ import { compose } from 'recompose';
 import AuthUserContext from './context'
 import {withFirebase} from "../Firebase";
 import * as ROUTES from '../../constants/routes';
+import { inject, observer } from "mobx-react";
 
 const withAuthorization = condition => Component => {
 	class WithAuthorization extends React.Component {
@@ -25,18 +26,16 @@ const withAuthorization = condition => Component => {
 		}
 
 		render() {
-			return (
-				<AuthUserContext.Consumer>
-					{authUser=>
-						condition(authUser) ? <Component {...this.props}/> : null
-					}
-				</AuthUserContext.Consumer>
-			)
+			return condition(this.props.sessionStore.authUser) ?
+				<Component {...this.props}/>
+				: null
 		}
 	}
 	return compose(
 		withRouter,
-		withFirebase
+		withFirebase,
+		inject('sessionStore'),
+		observer,
 	)(WithAuthorization)
 };
 

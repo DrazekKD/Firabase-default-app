@@ -4,17 +4,15 @@ import * as ROUTES from '../../constants/routes'
 import * as ROLES from '../../constants/roles'
 import SignOutButton from "../SignOut";
 import {AuthUserContext} from '../Session'
+import { inject, observer } from "mobx-react";
+import { compose } from "recompose";
 
-const Navigation = () => (
-	<div>
-		<AuthUserContext.Consumer>
-			{authUser =>
-				authUser
-					? <NavigationAuth authUser={authUser}/>
-					: <NavigationNonAuth/>
-			}
-		</AuthUserContext.Consumer>
-	</div>
+const Navigation = ({ sessionStore }) => (
+		sessionStore.authUser ? (
+				<NavigationAuth authUser={sessionStore.authUser}/>
+			) : (
+				<NavigationNonAuth/>
+			)
 );
 const NavigationAuth = ({authUser}) => (
 	<ul>
@@ -52,6 +50,9 @@ const NavigationNonAuth = () => {
 	);
 };
 
-export default Navigation;
+export default compose(
+		inject('sessionStore'),
+		observer,
+	)(Navigation);
 
 export {NavigationAuth, NavigationNonAuth}
